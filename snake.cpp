@@ -3,41 +3,9 @@
 #include <string>
 #include <unistd.h>
 #include <ncurses.h>
+#include "snake.h"
 
 using namespace std;
-
-#define MAP_HEIGHT 15
-#define MAP_WIDTH 30
-#define DIRECTION_UP 1
-#define DIRECTION_DOWN 2
-#define DIRECTION_LEFT 3
-#define DIRECTION_RIGHT 4
-#define MAX_SNAKE_LENGTH 100
-
-struct Point {
-	int x;
-	int y;
-};
-
-struct Node {
-	Point point;
-	Node* next;
-};
-
-class Snake {
-public:
-void enqueue(Point);
-Point dequeue();
-Node* head;
-int length;
-};
-
-void initializeVariables();
-void printMap();
-void generateFood();
-int moveSnake(Snake* snake);
-
-const int GAME_OVER = -1, MOVED = 0, FOOD_EATEN = 1;
 
 char gameMap[MAP_HEIGHT][MAP_WIDTH];
 int direction = DIRECTION_RIGHT;
@@ -65,6 +33,7 @@ int main(){
 	generateFood();
 	while(running) {
 		if( (ch=getch()) != ERR) {
+			// VIM key bindings
 			switch(ch) {
 			case 'h': if(direction != DIRECTION_RIGHT)
 					direction = DIRECTION_LEFT;
