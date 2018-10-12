@@ -49,12 +49,12 @@ int main(){
 				break;
 			}
 		}
+		usleep(500000);
 		result = moveSnake(&snake);
 		switch(result) {
 		case GAME_OVER: running=FALSE;
 		case FOOD_EATEN: generateFood();
 		}
-		usleep(500000);
 	}
 	nodelay(stdscr, FALSE);
 	clear();
