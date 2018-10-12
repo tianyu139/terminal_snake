@@ -27,7 +27,7 @@ int main(){
 
 	initializeVariables();
 
-	gameMap[startPoint.y][startPoint.x] = 'x';
+	gameMap[startPoint.y][startPoint.x] = SNAKE_CHAR;
 
 	printMap();
 	generateFood();
@@ -53,9 +53,12 @@ int main(){
 		result = moveSnake(&snake);
 		switch(result) {
 		case GAME_OVER: running=FALSE;
+		break;
 		case FOOD_EATEN: generateFood();
+		break;
 		}
 	}
+	// ToDo: Delete snake entirely
 	nodelay(stdscr, FALSE);
 	clear();
 	mvprintw(0,0, "Game over!");
@@ -71,8 +74,8 @@ void generateFood(){
 		randX = rand() % MAP_WIDTH;
 		randY = rand() % MAP_HEIGHT;
 	}
-	gameMap[randY][randX] = 'o';
-	mvaddch(randY, randX, 'o');
+	gameMap[randY][randX] = FOOD_CHAR;
+	mvaddch(randY, randX, FOOD_CHAR);
 }
 
 void initializeVariables(){
@@ -80,12 +83,12 @@ void initializeVariables(){
 		for (int j=1; j<MAP_HEIGHT-1; j++)
 			gameMap[j][i] = ' ';
 	for (int i=0; i<MAP_WIDTH; i++) {
-		gameMap[0][i] = '#';
-		gameMap[MAP_HEIGHT-1][i] = '#';
+		gameMap[0][i] = WALL_CHAR;
+		gameMap[MAP_HEIGHT-1][i] = WALL_CHAR;
 	}
 	for (int j=1; j<MAP_HEIGHT-1; j++) {
-		gameMap[j][0] = '#';
-		gameMap[j][MAP_WIDTH-1] = '#';
+		gameMap[j][0] = WALL_CHAR;
+		gameMap[j][MAP_WIDTH-1] = WALL_CHAR;
 	}
 }
 
@@ -110,14 +113,14 @@ int moveSnake(Snake* snake){
 		break;
 	}
 
-	if (gameMap[yCoord][xCoord] == '#' || gameMap[yCoord][xCoord] == 'x') return GAME_OVER;
+	if (gameMap[yCoord][xCoord] == WALL_CHAR || gameMap[yCoord][xCoord] == SNAKE_CHAR) return GAME_OVER;
 	else {
 		Point newHeadPoint = {xCoord, yCoord};
 		snake->enqueue(newHeadPoint);
 		bool food = FALSE;
-		if(gameMap[yCoord][xCoord] == 'o') food=TRUE;
-		gameMap[yCoord][xCoord] = 'x';
-		mvaddch(yCoord, xCoord, 'x');
+		if(gameMap[yCoord][xCoord] == FOOD_CHAR) food=TRUE;
+		gameMap[yCoord][xCoord] = SNAKE_CHAR;
+		mvaddch(yCoord, xCoord, SNAKE_CHAR);
 
 		if(!food) {
 			Point prevPoint = snake->dequeue();
@@ -147,6 +150,7 @@ Point Snake::dequeue()
 	if(!head->next)
 	{
 		p = head->point;
+		delete(head);
 		head = nullptr;
 		length--;
 		return p;
