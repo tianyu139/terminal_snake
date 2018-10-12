@@ -110,7 +110,7 @@ int moveSnake(Snake* snake){
 		break;
 	}
 
-	if (gameMap[yCoord][xCoord] == '#') return GAME_OVER;
+	if (gameMap[yCoord][xCoord] == '#' || gameMap[yCoord][xCoord] == 'x') return GAME_OVER;
 	else {
 		Point newHeadPoint = {xCoord, yCoord};
 		snake->enqueue(newHeadPoint);
