@@ -19,6 +19,15 @@ int main(){
 	Snake snake = {firstNode, 1};
 
 	initscr();
+	if(has_colors() == FALSE)
+	{
+		endwin();
+		printf("Your terminal does not support color\n");
+		exit(1);
+	}
+	start_color();
+	init_pair(1, COLOR_RED, COLOR_BLACK);
+	init_pair(2, COLOR_CYAN, COLOR_BLACK);
 	cbreak();
 	noecho();
 	keypad(stdscr, TRUE);
@@ -27,9 +36,9 @@ int main(){
 
 	initializeVariables();
 
-	gameMap[startPoint.y][startPoint.x] = SNAKE_CHAR;
-
 	printMap();
+	gameMap[startPoint.y][startPoint.x] = SNAKE_CHAR;
+	mvaddch(startPoint.y, startPoint.x, SNAKE_CHAR);
 	generateFood();
 	while(running) {
 		if( (ch=getch()) != ERR) {
@@ -75,7 +84,9 @@ void generateFood(){
 		randY = rand() % MAP_HEIGHT;
 	}
 	gameMap[randY][randX] = FOOD_CHAR;
+	attron(COLOR_PAIR(2));
 	mvaddch(randY, randX, FOOD_CHAR);
+	attroff(COLOR_PAIR(2));
 }
 
 void initializeVariables(){
@@ -93,10 +104,12 @@ void initializeVariables(){
 }
 
 void printMap(){
+	attron(COLOR_PAIR(1));
 	for (int i=0; i<MAP_WIDTH; i++) {
 		for (int j=0; j<MAP_HEIGHT; j++)
 			mvaddch(j, i, gameMap[j][i]);
 	}
+	attroff(COLOR_PAIR(1));
 }
 
 int moveSnake(Snake* snake){
