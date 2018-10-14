@@ -9,6 +9,8 @@ using namespace std;
 
 char gameMap[MAP_HEIGHT][MAP_WIDTH];
 int direction = DIRECTION_RIGHT;
+Point bonusFoodPoint;
+int bonusFoodTime = -1;
 
 int main(){
 
@@ -28,6 +30,7 @@ int main(){
 	start_color();
 	init_pair(1, COLOR_RED, COLOR_BLACK);
 	init_pair(2, COLOR_CYAN, COLOR_BLACK);
+	init_pair(3, COLOR_GREEN, COLOR_BLACK);
 	cbreak();
 	noecho();
 	keypad(stdscr, TRUE);
@@ -60,6 +63,7 @@ int main(){
 		}
 		usleep(500000);
 		result = moveSnake(&snake);
+		updateBonusFood();
 		switch(result) {
 		case GAME_OVER: running=FALSE;
 		break;
@@ -77,16 +81,43 @@ int main(){
 }
 
 void generateFood(){
+
+	if ( bonusFoodTime == -1 && rand() % 100 <= BONUS_CHANCE) {
+		bonusFoodPoint = getEmptySpot();
+		bonusFoodTime = 20;
+		gameMap[bonusFoodPoint.y][bonusFoodPoint.x] = BONUS_FOOD_CHAR;
+		attron(COLOR_PAIR(3));
+		mvaddch(bonusFoodPoint.y, bonusFoodPoint.x, BONUS_FOOD_CHAR);
+		attroff(COLOR_PAIR(3));
+	}
+	Point foodPoint = getEmptySpot();
+	int randY = foodPoint.y, randX = foodPoint.x;
+	gameMap[randY][randX] = FOOD_CHAR;
+	attron(COLOR_PAIR(2));
+	mvaddch(randY, randX, FOOD_CHAR);
+	attroff(COLOR_PAIR(2));
+}
+
+void updateBonusFood(){
+	if(bonusFoodTime == -1)
+		return;
+	if (--bonusFoodTime == -1){
+		gameMap[bonusFoodPoint.y][bonusFoodPoint.x] = ' ';
+		mvaddch(bonusFoodPoint.y, bonusFoodPoint.x, ' ');
+		bonusFoodPoint = {-1, -1};
+
+	}
+}
+
+Point getEmptySpot(){
 	int randX = rand() % MAP_WIDTH;
 	int randY = rand() % MAP_HEIGHT;
 	while (gameMap[randY][randX] != ' ') {
 		randX = rand() % MAP_WIDTH;
 		randY = rand() % MAP_HEIGHT;
 	}
-	gameMap[randY][randX] = FOOD_CHAR;
-	attron(COLOR_PAIR(2));
-	mvaddch(randY, randX, FOOD_CHAR);
-	attroff(COLOR_PAIR(2));
+	Point p = {randY, randX};
+	return p;
 }
 
 void initializeVariables(){
@@ -128,21 +159,20 @@ int moveSnake(Snake* snake){
 
 	if (gameMap[yCoord][xCoord] == WALL_CHAR || gameMap[yCoord][xCoord] == SNAKE_CHAR) return GAME_OVER;
 	else {
-		Point newHeadPoint = {xCoord, yCoord};
+		Point newHeadPoint = {yCoord, xCoord};
 		snake->enqueue(newHeadPoint);
-		bool food = FALSE;
-		if(gameMap[yCoord][xCoord] == FOOD_CHAR) food=TRUE;
+		int foodStatus = MOVED;
+		if(gameMap[yCoord][xCoord] == FOOD_CHAR) foodStatus=FOOD_EATEN;
+		else if(gameMap[yCoord][xCoord] == BONUS_FOOD_CHAR) foodStatus=BONUS_FOOD_EATEN;
 		gameMap[yCoord][xCoord] = SNAKE_CHAR;
 		mvaddch(yCoord, xCoord, SNAKE_CHAR);
 
-		if(!food) {
+		if(foodStatus == MOVED) {
 			Point prevPoint = snake->dequeue();
 			gameMap[prevPoint.y][prevPoint.x] = ' ';
 			mvaddch(prevPoint.y, prevPoint.x, ' ');
-			return MOVED;
-		} else {
-			return FOOD_EATEN;
 		}
+		return foodStatus;
 	}
 }
 
