@@ -11,6 +11,10 @@ char gameMap[MAP_HEIGHT][MAP_WIDTH];
 int direction = DIRECTION_RIGHT;
 Point bonusFoodPoint;
 int bonusFoodTime = -1;
+int scoreY = MAP_HEIGHT + 2;
+int scoreX = 3;
+int score = 0;
+int bonusFoodLength = 0;
 
 int main(){
 
@@ -64,11 +68,12 @@ int main(){
 		usleep(500000);
 		result = moveSnake(&snake);
 		updateBonusFood();
+		updateScore();
 		switch(result) {
 		case GAME_OVER: running=FALSE;
-		break;
+			break;
 		case FOOD_EATEN: generateFood();
-		break;
+			break;
 		}
 	}
 	// ToDo: Delete snake entirely
@@ -101,12 +106,16 @@ void generateFood(){
 void updateBonusFood(){
 	if(bonusFoodTime == -1)
 		return;
-	if (--bonusFoodTime == -1){
+	if (--bonusFoodTime == -1) {
 		gameMap[bonusFoodPoint.y][bonusFoodPoint.x] = ' ';
 		mvaddch(bonusFoodPoint.y, bonusFoodPoint.x, ' ');
 		bonusFoodPoint = {-1, -1};
 
 	}
+}
+
+void updateScore(){
+	mvprintw(scoreY, scoreX, "Score: %d", score);
 }
 
 Point getEmptySpot(){
@@ -162,15 +171,26 @@ int moveSnake(Snake* snake){
 		Point newHeadPoint = {yCoord, xCoord};
 		snake->enqueue(newHeadPoint);
 		int foodStatus = MOVED;
-		if(gameMap[yCoord][xCoord] == FOOD_CHAR) foodStatus=FOOD_EATEN;
-		else if(gameMap[yCoord][xCoord] == BONUS_FOOD_CHAR) foodStatus=BONUS_FOOD_EATEN;
+		if(gameMap[yCoord][xCoord] == FOOD_CHAR) {
+			foodStatus=FOOD_EATEN;
+			score++;
+		}
+		else if(gameMap[yCoord][xCoord] == BONUS_FOOD_CHAR) {
+			foodStatus=BONUS_FOOD_EATEN;
+			bonusFoodLength+=BONUS_FOOD_SCORE;
+			score+= BONUS_FOOD_SCORE;
+		}
 		gameMap[yCoord][xCoord] = SNAKE_CHAR;
 		mvaddch(yCoord, xCoord, SNAKE_CHAR);
 
 		if(foodStatus == MOVED) {
-			Point prevPoint = snake->dequeue();
-			gameMap[prevPoint.y][prevPoint.x] = ' ';
-			mvaddch(prevPoint.y, prevPoint.x, ' ');
+			if(bonusFoodLength>0){
+				bonusFoodLength--;
+			} else {
+				Point prevPoint = snake->dequeue();
+				gameMap[prevPoint.y][prevPoint.x] = ' ';
+				mvaddch(prevPoint.y, prevPoint.x, ' ');
+			}
 		}
 		return foodStatus;
 	}
