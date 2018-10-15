@@ -79,7 +79,8 @@ int main(){
 	// ToDo: Delete snake entirely
 	nodelay(stdscr, FALSE);
 	clear();
-	mvprintw(0,0, "Game over!");
+	mvprintw(1,1, "Game over!");
+	mvprintw(2,1, "Your score: %d", score);
 	getch();
 	endwin();
 	return 0;
