@@ -2,6 +2,7 @@
 #include <ctime>
 #include <string>
 #include <unistd.h>
+#include <fstream>
 #include <ncurses.h>
 #include "snake.h"
 
@@ -15,6 +16,7 @@ int scoreY = MAP_HEIGHT + 2;
 int scoreX = 3;
 int score = 0;
 int bonusFoodLength = 0;
+int gameSpeed = 1;
 
 int main(){
 
@@ -39,14 +41,20 @@ int main(){
 	noecho();
 	keypad(stdscr, TRUE);
 	curs_set(0);
-	nodelay(stdscr, TRUE);
 
+	printFile("splash.txt");
+	while( getch() != ' ')
+		;
+	clear();
+	nodelay(stdscr, TRUE);
 	initializeVariables();
 
 	printMap();
 	gameMap[startPoint.y][startPoint.x] = SNAKE_CHAR;
 	mvaddch(startPoint.y, startPoint.x, SNAKE_CHAR);
 	generateFood();
+	updateScore();
+	updateGameSpeed();
 	while(running) {
 		if( (ch=getch()) != ERR) {
 			// VIM key bindings
@@ -63,12 +71,19 @@ int main(){
 			case 'k': if(direction != DIRECTION_DOWN)
 					direction = DIRECTION_UP;
 				break;
+			case 'n': if(gameSpeed > 1){
+					gameSpeed--;
+					updateGameSpeed();
+				}
+			case 'm': if(gameSpeed < 10){
+					gameSpeed++;
+					updateGameSpeed();
+				}
 			}
 		}
-		usleep(500000);
+		usleep(500000 / gameSpeed);
 		result = moveSnake(&snake);
 		updateBonusFood();
-		updateScore();
 		switch(result) {
 		case GAME_OVER: running=FALSE;
 			break;
@@ -84,6 +99,25 @@ int main(){
 	getch();
 	endwin();
 	return 0;
+}
+
+void printFile(string filename){
+	ifstream splashScreen;
+	string line;
+	int newlines=0;
+	splashScreen.open(filename);
+	if (splashScreen.is_open())
+  {
+    while ( getline (splashScreen,line) )
+    {
+			mvprintw(newlines++, 0, line.c_str());
+    }
+    splashScreen.close();
+  }
+}
+
+void updateGameSpeed(){
+	mvprintw(scoreY, scoreX, "Speed: %dx", gameSpeed);
 }
 
 void generateFood(){
@@ -116,7 +150,7 @@ void updateBonusFood(){
 }
 
 void updateScore(){
-	mvprintw(scoreY, scoreX, "Score: %d", score);
+	mvprintw(scoreY + 1, scoreX, "Score: %d", score);
 }
 
 Point getEmptySpot(){
@@ -175,11 +209,13 @@ int moveSnake(Snake* snake){
 		if(gameMap[yCoord][xCoord] == FOOD_CHAR) {
 			foodStatus=FOOD_EATEN;
 			score++;
+			updateScore();
 		}
 		else if(gameMap[yCoord][xCoord] == BONUS_FOOD_CHAR) {
 			foodStatus=BONUS_FOOD_EATEN;
 			bonusFoodLength+=BONUS_FOOD_SCORE;
 			score+= BONUS_FOOD_SCORE;
+			updateScore();
 		}
 		gameMap[yCoord][xCoord] = SNAKE_CHAR;
 		mvaddch(yCoord, xCoord, SNAKE_CHAR);
