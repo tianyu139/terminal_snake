@@ -7,6 +7,7 @@ const int DIRECTION_UP = 1, DIRECTION_DOWN = 2, DIRECTION_LEFT = 3, DIRECTION_RI
 const char WALL_CHAR='#', SNAKE_CHAR='x', FOOD_CHAR='o', BONUS_FOOD_CHAR='S';
 const int BONUS_CHANCE = 20; // Out of 100
 const int BONUS_FOOD_SCORE = 3;
+const string HELP_FILENAME = "help.txt", SPLASH_FILENAME = "splash.txt";
 
 struct Point {
 	int y;

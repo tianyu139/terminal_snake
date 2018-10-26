@@ -1,0 +1,13 @@
+Rules
+
+- Movement (VIM key bindings)
+ h: left 
+ j: down
+ k: up
+ l: right
+
+- Toggle game speed
+ n: decrease speed
+ m: increase speed
+
+press q to go back to main screen

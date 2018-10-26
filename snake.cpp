@@ -42,9 +42,18 @@ int main(){
 	keypad(stdscr, TRUE);
 	curs_set(0);
 
-	printFile("splash.txt");
-	while( getch() != ' ')
-		;
+	printFile(SPLASH_FILENAME);
+	while( (ch=getch()) != ' '){
+		if (ch == 'h'){
+			clear();
+			printFile(HELP_FILENAME);
+			while(getch() != 'q')
+				;
+			clear();
+			printFile(SPLASH_FILENAME);
+		}
+	}
+
 	clear();
 	nodelay(stdscr, TRUE);
 	initializeVariables();
