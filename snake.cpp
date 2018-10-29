@@ -84,10 +84,12 @@ int main(){
 					gameSpeed--;
 					updateGameSpeed();
 				}
+				break;
 			case 'm': if(gameSpeed < 10){
 					gameSpeed++;
 					updateGameSpeed();
 				}
+				break;
 			}
 		}
 		usleep(500000 / gameSpeed);
